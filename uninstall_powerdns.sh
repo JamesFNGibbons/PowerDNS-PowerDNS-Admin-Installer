@@ -6,19 +6,31 @@ set -e
 # Variables
 DB_ROOT_PASS="root_password"         # Set your MySQL root password
 PDNS_ADMIN_DIR="/opt/powerdns-admin"
+SERVICES=("pdns" "powerdns-admin")
 
 # Function to print messages
 log() {
   echo -e "\n\e[1;34m$1\e[0m\n"
 }
 
-log "Stopping and disabling PowerDNS and PowerDNS-Admin services..."
+# Function to check and stop a service if it exists
+check_and_stop_service() {
+  local service=$1
+  if systemctl list-units --type=service --state=running | grep -q "$service.service"; then
+    log "Stopping and disabling $service service..."
+    sudo systemctl stop "$service"
+    sudo systemctl disable "$service"
+  else
+    log "$service service is not running or does not exist."
+  fi
+}
 
-# Stop and disable PowerDNS and PowerDNS-Admin services
-sudo systemctl stop pdns
-sudo systemctl disable pdns
-sudo systemctl stop powerdns-admin
-sudo systemctl disable powerdns-admin
+log "Checking and stopping PowerDNS and PowerDNS-Admin services..."
+
+# Check and stop PowerDNS and PowerDNS-Admin services if they exist
+for service in "${SERVICES[@]}"; do
+  check_and_stop_service "$service"
+done
 
 log "Removing PowerDNS and PowerDNS-Admin..."
 
