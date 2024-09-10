@@ -60,14 +60,17 @@ log "Enabling PowerDNS service to start on boot..."
 sudo systemctl enable pdns
 
 log "Installing dependencies for PowerDNS-Admin..."
-sudo apt-get install -y git python3-pip python3-dev libmysqlclient-dev libssl-dev libffi-dev
+sudo apt-get install -y git python3-pip python3-dev python3-venv libmysqlclient-dev libssl-dev libffi-dev
 
 log "Cloning PowerDNS-Admin repository..."
 sudo git clone $PDNS_ADMIN_REPO $PDNS_ADMIN_DIR
 
+log "Creating and activating Python virtual environment..."
+python3 -m venv $PDNS_ADMIN_DIR/venv
+source $PDNS_ADMIN_DIR/venv/bin/activate
+
 log "Installing Python dependencies..."
-cd $PDNS_ADMIN_DIR
-sudo pip3 install -r requirements.txt
+pip install -r $PDNS_ADMIN_DIR/requirements.txt
 
 log "Configuring PowerDNS-Admin..."
 sudo cp $PDNS_ADMIN_DIR/configs/config_template.py $PDNS_ADMIN_DIR/config.py
@@ -77,8 +80,9 @@ sudo sed -i "s/SQLA_DB_NAME =.*/SQLA_DB_NAME = '$PDNS_ADMIN_DB'/" $PDNS_ADMIN_DI
 sudo sed -i "s/SQLA_DB_HOST =.*/SQLA_DB_HOST = 'localhost'/" $PDNS_ADMIN_DIR/config.py
 
 log "Initializing PowerDNS-Admin database..."
-sudo python3 $PDNS_ADMIN_DIR/manage.py db upgrade
-sudo python3 $PDNS_ADMIN_DIR/manage.py db migrate
+source $PDNS_ADMIN_DIR/venv/bin/activate
+python $PDNS_ADMIN_DIR/manage.py db upgrade
+python $PDNS_ADMIN_DIR/manage.py db migrate
 
 log "Creating PowerDNS-Admin systemd service..."
 sudo bash -c 'cat <<EOF > /etc/systemd/system/powerdns-admin.service
@@ -88,7 +92,7 @@ After=network.target
 
 [Service]
 User=root
-ExecStart=/usr/bin/python3 /opt/powerdns-admin/run.py
+ExecStart=/opt/powerdns-admin/venv/bin/python /opt/powerdns-admin/run.py
 WorkingDirectory=/opt/powerdns-admin
 Restart=always
 
