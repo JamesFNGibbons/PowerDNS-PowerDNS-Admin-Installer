@@ -68,6 +68,9 @@ sudo apt-get install python3-flask-mail
 sudo apt-get install python3-flask-session
 sudo apt-get install python3-flask-migrate
 
+log "Installing other python3 sys wide libs"
+sudo apt-get install python3-pyotp
+
 log "Cloning PowerDNS-Admin repository..."
 sudo git clone $PDNS_ADMIN_REPO $PDNS_ADMIN_DIR
 
