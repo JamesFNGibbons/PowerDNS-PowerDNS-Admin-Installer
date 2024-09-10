@@ -65,6 +65,7 @@ sudo apt-get install -y git python3-pip python3-dev python3-venv libmysqlclient-
 log "Installing Python3 FLASK"
 sudo apt-get install python3-flask
 sudo apt-get install python3-flask-mail
+sudo apt-get install python3-flask-session
 
 log "Cloning PowerDNS-Admin repository..."
 sudo git clone $PDNS_ADMIN_REPO $PDNS_ADMIN_DIR
