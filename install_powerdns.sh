@@ -60,7 +60,7 @@ log "Enabling PowerDNS service to start on boot..."
 sudo systemctl enable pdns
 
 log "Installing dependencies for PowerDNS-Admin..."
-sudo apt-get install -y git python3-pip python3-dev python3-venv libmysqlclient-dev libssl-dev libffi-dev
+sudo apt-get install -y git python3-pip python3-dev python3-venv libmysqlclient-dev libssl-dev libffi-dev pkg-config libpq-dev
 
 log "Cloning PowerDNS-Admin repository..."
 sudo git clone $PDNS_ADMIN_REPO $PDNS_ADMIN_DIR
@@ -70,6 +70,10 @@ python3 -m venv $PDNS_ADMIN_DIR/venv
 source $PDNS_ADMIN_DIR/venv/bin/activate
 
 log "Installing Python dependencies..."
+pip install -r $PDNS_ADMIN_DIR/requirements.txt
+
+log "Replacing psycopg2 with psycopg2-binary in requirements..."
+sed -i "s/psycopg2==.*/psycopg2-binary==2.9.5/" $PDNS_ADMIN_DIR/requirements.txt
 pip install -r $PDNS_ADMIN_DIR/requirements.txt
 
 log "Configuring PowerDNS-Admin..."
