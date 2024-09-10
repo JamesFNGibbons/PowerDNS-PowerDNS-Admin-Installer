@@ -78,16 +78,9 @@ pip install -r $PDNS_ADMIN_DIR/requirements.txt
 
 log "Configuring PowerDNS-Admin..."
 sudo bash -c 'cat <<EOF > /opt/powerdns-admin/config.py
-SQLA_DB_USER = "'$PDNS_ADMIN_USER'"
-SQLA_DB_PASSWORD = "'$PDNS_ADMIN_PASS'"
-SQLA_DB_NAME = "'$PDNS_ADMIN_DB'"
-SQLA_DB_HOST = "localhost"
+SQLALCHEMY_DATABASE_URI = "mysql+pymysql://pdnsadmin:pdnsadmin_password@localhost/powerdnsadmin"
+SECRET_KEY = "your_secret_key"
 EOF'
-
-log "Initializing PowerDNS-Admin database..."
-source $PDNS_ADMIN_DIR/venv/bin/activate
-python $PDNS_ADMIN_DIR/manage.py db upgrade
-python $PDNS_ADMIN_DIR/manage.py db migrate
 
 log "Creating PowerDNS-Admin systemd service..."
 sudo bash -c 'cat <<EOF > /etc/systemd/system/powerdns-admin.service
