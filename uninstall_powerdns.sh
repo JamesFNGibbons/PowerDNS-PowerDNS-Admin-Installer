@@ -1,38 +1,72 @@
 #!/bin/bash
 
-# Script to completely uninstall and purge Dovecot and its configuration files
+# Exit immediately if a command exits with a non-zero status
+set -e
 
-# Stop Dovecot service
-echo "Stopping Dovecot service..."
-sudo systemctl stop dovecot
+# Variables
+DB_ROOT_PASS="root_password"         # Set your MySQL root password
+PDNS_ADMIN_DIR="/opt/powerdns-admin"
 
-# Disable Dovecot service
-echo "Disabling Dovecot service..."
-sudo systemctl disable dovecot
+# Function to print messages
+log() {
+  echo -e "\n\e[1;34m$1\e[0m\n"
+}
 
-# Purge Dovecot packages
-echo "Purging Dovecot packages..."
-sudo apt-get purge --auto-remove dovecot-core dovecot-imapd dovecot-pop3d dovecot-lmtpd dovecot-sieve dovecot-managesieved
+log "Stopping and disabling PowerDNS and PowerDNS-Admin services..."
 
-# Remove Dovecot user and group
-echo "Removing Dovecot user and group..."
-sudo deluser dovecot
-sudo delgroup dovecot
+# Stop and disable PowerDNS and PowerDNS-Admin services
+sudo systemctl stop pdns
+sudo systemctl disable pdns
+sudo systemctl stop powerdns-admin
+sudo systemctl disable powerdns-admin
 
-# Remove remaining configuration and log files
-echo "Deleting Dovecot configuration and log files..."
-sudo rm -rf /etc/dovecot
-sudo rm -rf /var/lib/dovecot
-sudo rm -rf /var/log/dovecot
-sudo rm -rf /usr/share/dovecot
+log "Removing PowerDNS and PowerDNS-Admin..."
 
-# Optionally remove mail directory if it's specifically for Dovecot (BE CAREFUL)
-# Uncomment the following line if you're sure you want to delete all mail directories associated with Dovecot
-# sudo rm -rf /var/mail /home/*/Maildir
+# Remove PowerDNS and PowerDNS-Admin packages
+sudo apt-get remove --purge -y pdns-server pdns-backend-mysql
+sudo apt-get autoremove -y
 
-# Clean up the apt cache
-echo "Cleaning up the apt cache..."
+log "Removing PowerDNS-Admin directory..."
+
+# Remove PowerDNS-Admin directory
+sudo rm -rf $PDNS_ADMIN_DIR
+
+log "Removing MySQL and its data..."
+
+# Remove MySQL server and its data
+sudo apt-get remove --purge -y mysql-server mysql-client mysql-common mysql-server-core-* mysql-client-core-*
 sudo apt-get autoremove -y
 sudo apt-get autoclean -y
 
-echo "Dovecot has been completely removed from your system."
+# Remove MySQL data and configuration
+sudo rm -rf /etc/mysql
+sudo rm -rf /var/lib/mysql
+sudo rm -rf /var/log/mysql
+sudo rm -rf /var/lib/mysql-files
+sudo rm -rf /var/lib/mysql-keyring
+sudo rm -rf /var/lib/mysql-cluster
+
+# Optionally remove MySQL user
+sudo deluser mysql
+sudo delgroup mysql
+
+log "Removing configuration files..."
+
+# Remove PowerDNS configuration files
+sudo rm -f /etc/powerdns/pdns.conf
+
+# Remove systemd service files
+sudo rm -f /etc/systemd/system/powerdns-admin.service
+
+log "Cleaning up remaining files..."
+
+# Clean up remaining files and directories
+sudo rm -rf /var/lib/powerdns
+sudo rm -rf /var/log/pdns
+
+# Restore resolv.conf if needed
+if [ -f /etc/resolv.conf.backup ]; then
+  sudo mv /etc/resolv.conf.backup /etc/resolv.conf
+fi
+
+log "Cleanup complete!"
