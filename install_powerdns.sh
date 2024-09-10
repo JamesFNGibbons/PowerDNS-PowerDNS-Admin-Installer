@@ -77,11 +77,12 @@ sed -i "s/psycopg2==.*/psycopg2-binary==2.9.5/" $PDNS_ADMIN_DIR/requirements.txt
 pip install -r $PDNS_ADMIN_DIR/requirements.txt
 
 log "Configuring PowerDNS-Admin..."
-sudo cp $PDNS_ADMIN_DIR/configs/config_template.py $PDNS_ADMIN_DIR/config.py
-sudo sed -i "s/SQLA_DB_USER =.*/SQLA_DB_USER = '$PDNS_ADMIN_USER'/" $PDNS_ADMIN_DIR/config.py
-sudo sed -i "s/SQLA_DB_PASSWORD =.*/SQLA_DB_PASSWORD = '$PDNS_ADMIN_PASS'/" $PDNS_ADMIN_DIR/config.py
-sudo sed -i "s/SQLA_DB_NAME =.*/SQLA_DB_NAME = '$PDNS_ADMIN_DB'/" $PDNS_ADMIN_DIR/config.py
-sudo sed -i "s/SQLA_DB_HOST =.*/SQLA_DB_HOST = 'localhost'/" $PDNS_ADMIN_DIR/config.py
+sudo bash -c 'cat <<EOF > /opt/powerdns-admin/config.py
+SQLA_DB_USER = "'$PDNS_ADMIN_USER'"
+SQLA_DB_PASSWORD = "'$PDNS_ADMIN_PASS'"
+SQLA_DB_NAME = "'$PDNS_ADMIN_DB'"
+SQLA_DB_HOST = "localhost"
+EOF'
 
 log "Initializing PowerDNS-Admin database..."
 source $PDNS_ADMIN_DIR/venv/bin/activate
