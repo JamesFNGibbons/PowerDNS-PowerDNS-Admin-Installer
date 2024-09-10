@@ -67,6 +67,7 @@ sudo apt-get install python3-flask
 sudo apt-get install python3-flask-mail
 sudo apt-get install python3-flask-session
 sudo apt-get install python3-flask-migrate
+sudo apt-get install python3-flask-login
 
 log "Installing other python3 sys wide libs"
 sudo apt-get install python3-pyotp
