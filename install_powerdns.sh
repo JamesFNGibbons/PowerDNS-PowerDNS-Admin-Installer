@@ -60,7 +60,7 @@ log "Enabling PowerDNS service to start on boot..."
 sudo systemctl enable pdns
 
 log "Installing dependencies for PowerDNS-Admin..."
-sudo apt-get install -y git python3-pip python3-dev python3-venv libmysqlclient-dev libssl-dev libffi-dev pkg-config libpq-dev
+sudo apt-get install -y git python3-pip python3-dev python3-venv libmysqlclient-dev libssl-dev libffi-dev pkg-config libpq-dev libldap2-dev libsasl2-dev
 
 log "Cloning PowerDNS-Admin repository..."
 sudo git clone $PDNS_ADMIN_REPO $PDNS_ADMIN_DIR
